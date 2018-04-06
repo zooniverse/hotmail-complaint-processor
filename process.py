@@ -6,7 +6,7 @@ import yaml
 
 from panoptes_client import Panoptes, User
 
-with open('config.yml', 'r') as f:
+with open('/run/secrets/config.yml', 'r') as f:
     CONFIG = yaml.load(f)
 
 s3 = boto3.resource('s3')
