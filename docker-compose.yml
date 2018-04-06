@@ -4,6 +4,8 @@ services:
   dev:
     build:
       context:  ./
+    volumes:
+      - ${PWD}:/usr/src/app
     environment:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}

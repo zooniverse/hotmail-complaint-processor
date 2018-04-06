@@ -2,20 +2,24 @@ import email
 import re
 
 import boto3
+import yaml
 
 from panoptes_client import Panoptes, User
 
-
-S3_EMAIL_BUCKET = 'zooniverse-replies'
-S3_EMAIL_PREFIX = 'hotmail-complaints/'
+with open('config.yml', 'r') as f:
+    CONFIG = yaml.load(f)
 
 s3 = boto3.resource('s3')
 
 addresses_to_unsubscribe = set()
 processed_s3_keys = []
 
-for s3_obj in s3.Bucket(S3_EMAIL_BUCKET).objects.filter(
-    Prefix=S3_EMAIL_PREFIX,
+# Limit to avoid paging bug in Panoptes by only requesting a small number
+# of users https://github.com/zooniverse/Panoptes/issues/2733
+for s3_obj in s3.Bucket(CONFIG['s3']['email_bucket']).objects.filter(
+        Prefix=CONFIG['s3']['email_prefix'],
+).limit(
+        count=5,
 ):
     print("Processing {}".format(s3_obj.key))
     processed_s3_keys.append(s3_obj.key)
@@ -31,6 +35,15 @@ for s3_obj in s3.Bucket(S3_EMAIL_BUCKET).objects.filter(
         )
         addresses_to_unsubscribe.add(subscriber_address_match.group('email'))
 
-# TODO: Unsubscribe the users with panoptes_client
+Panoptes.connect(**CONFIG['panoptes'])
 
-# TODO: Delete objects from S3
+for user in User.where(email=addresses_to_unsubscribe):
+    if user.valid_email and user.email in addresses_to_unsubscribe:
+        print("Invalidating email for {}".format(user.login))
+        user.reload()
+        user.valid_email = False
+        user.save()
+
+for key in processed_s3_keys:
+    print("Deleting {}".format(key))
+    s3.Object(CONFIG['s3']['email_bucket'], key).delete()

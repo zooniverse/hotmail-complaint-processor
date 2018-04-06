@@ -1,2 +1,3 @@
 boto3
-panoptes-client
+https://github.com/zooniverse/panoptes-python-client/archive/master.zip
+PyYAML
