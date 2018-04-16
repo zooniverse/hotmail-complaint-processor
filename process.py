@@ -43,12 +43,13 @@ for s3_obj in s3.Bucket(CONFIG['s3']['email_bucket']).objects.filter(
 
 Panoptes.connect(**CONFIG['panoptes'])
 
-for user in User.where(email=addresses_to_unsubscribe, page_size=BATCH_SIZE):
-    if user.valid_email and user.email in addresses_to_unsubscribe:
-        print("Invalidating email for {}".format(user.login))
-        user.reload()
-        user.valid_email = False
-        user.save()
+if addresses_to_unsubscribe:
+    for user in User.where(email=addresses_to_unsubscribe, page_size=BATCH_SIZE):
+        if user.valid_email and user.email in addresses_to_unsubscribe:
+            print("Invalidating email for {}".format(user.login))
+            user.reload()
+            user.valid_email = False
+            user.save()
 
 for key in processed_s3_keys:
     print("Deleting {}".format(key))
