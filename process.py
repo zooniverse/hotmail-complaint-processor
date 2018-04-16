@@ -6,6 +6,8 @@ import yaml
 
 from panoptes_client import Panoptes, User
 
+BATCH_SIZE = 50
+
 with open('/run/secrets/config.yml', 'r') as f:
     CONFIG = yaml.load(f)
 
@@ -19,7 +21,7 @@ processed_s3_keys = []
 for s3_obj in s3.Bucket(CONFIG['s3']['email_bucket']).objects.filter(
         Prefix=CONFIG['s3']['email_prefix'],
 ).limit(
-        count=5,
+        count=BATCH_SIZE,
 ):
     print("Processing {}".format(s3_obj.key))
     processed_s3_keys.append(s3_obj.key)
@@ -41,7 +43,7 @@ for s3_obj in s3.Bucket(CONFIG['s3']['email_bucket']).objects.filter(
 
 Panoptes.connect(**CONFIG['panoptes'])
 
-for user in User.where(email=addresses_to_unsubscribe):
+for user in User.where(email=addresses_to_unsubscribe, page_size=BATCH_SIZE):
     if user.valid_email and user.email in addresses_to_unsubscribe:
         print("Invalidating email for {}".format(user.login))
         user.reload()
