@@ -29,11 +29,15 @@ for s3_obj in s3.Bucket(CONFIG['s3']['email_bucket']).objects.filter(
         if not report_part.get_content_type() == 'message/rfc822':
             continue
         original_message = report_part.get_payload()[0]
-        subscriber_address_match = re.match(
-            r"<(?P<email>(.*@.*))>",
-            original_message['X-HmXmrOriginalRecipient'],
-        )
-        addresses_to_unsubscribe.add(subscriber_address_match.group('email'))
+        original_recipient = original_message['X-HmXmrOriginalRecipient']
+        if original_recipient:
+            subscriber_address_match = re.match(
+                r"<(?P<email>(.*@.*))>",
+                original_recipient,
+            )
+            addresses_to_unsubscribe.add(
+                subscriber_address_match.group('email')
+            )
 
 Panoptes.connect(**CONFIG['panoptes'])
 
