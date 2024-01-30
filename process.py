@@ -11,7 +11,8 @@ BATCH_SIZE = 50
 with open('/run/secrets/config.yml', 'r') as f:
     CONFIG = yaml.load(f)
 
-s3 = boto3.resource('s3')
+session = boto3.Session(profile_name='default')
+s3 = session.resource('s3')
 
 addresses_to_unsubscribe = set()
 processed_s3_keys = []
