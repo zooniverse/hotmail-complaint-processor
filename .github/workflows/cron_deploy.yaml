@@ -40,4 +40,6 @@ jobs:
         resource-group: kubernetes
 
     - name: Modify & apply template
-      run: kubectl create -f kubernetes/cron_script.yml
+      run: |
+        kubectl delete hotmail-complaint-processor-cronjob
+        kubectl create -f kubernetes/cron_script.yml
