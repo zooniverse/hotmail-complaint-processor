@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hotmail-complaint-processor-cronjob
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: hotmail-complaint-processor-cronjob
+        spec:
+          containers:
+          - name: hotmail-complaint-processor-cronjob
+            image: ghcr.io/zooniverse/hotmail-complaint-processor
+            volumeMounts:
+            - name: hotmail-complaint-config
+              mountPath: "/run/secrets/config.yml"
+              subPath: "config.yml"
+              readOnly: true
+            - name: hotmail-aws-creds
+              mountPath: "/root/.aws/credentials"
+              subPath: "credentials"
+              readOnly: true
+          volumes:
+          - name: hotmail-complaint-config
+            secret:
+              secretName: hotmail-complaint-config
+          - name: hotmail-aws-creds
+            secret:
+              secretName: hotmail-aws-creds
+          restartPolicy: Never
+      backoffLimit: 2

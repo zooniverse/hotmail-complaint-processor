@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: hotmail-complaint-processor-job-
+spec:
+  template:
+    metadata:
+      name: hotmail-complaint-processor-job
+    spec:
+      containers:
+      - name: hotmail-complaint-processor-job
+        image: ghcr.io/zooniverse/hotmail-complaint-processor
+        volumeMounts:
+        - name: hotmail-complaint-config
+          mountPath: "/run/secrets/config.yml"
+          subPath: "config.yml"
+          readOnly: true
+        - name: hotmail-aws-creds
+          mountPath: "/root/.aws/credentials"
+          subPath: "credentials"
+          readOnly: true
+      volumes:
+      - name: hotmail-complaint-config
+        secret:
+          secretName: hotmail-complaint-config
+      - name: hotmail-aws-creds
+        secret:
+          secretName: hotmail-aws-creds
+      restartPolicy: Never
+  backoffLimit: 2
