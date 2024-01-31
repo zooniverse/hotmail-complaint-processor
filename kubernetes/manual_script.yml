@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: hotmail-complaint-processor-job
-        image: zooniverse/hotmail-complaint-processor
+        image: ghcr.io/zooniverse/hotmail-complaint-processor
         volumeMounts:
         - name: hotmail-complaint-config
           mountPath: "/run/secrets/config.yml"
