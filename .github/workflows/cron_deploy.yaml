@@ -41,5 +41,5 @@ jobs:
 
     - name: Modify & apply template
       run: |
-        kubectl delete hotmail-complaint-processor-cronjob
+        kubectl delete cronjob hotmail-complaint-processor-cronjob
         kubectl create -f kubernetes/cron_script.yml
