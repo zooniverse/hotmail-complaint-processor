@@ -1,0 +1,43 @@
+name: Deploy Hotmail Processing Cron Task
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build_and_push_image:
+    name: Build and Push Image
+    uses: zooniverse/ci-cd/.github/workflows/build_and_push_image.yaml@main
+    with:
+      repo_name: hotmail-complaint-processor
+      commit_id: ${{ github.sha }}
+      latest: true
+
+  deploy_cron:
+    runs-on: ubuntu-latest
+    needs: build_and_push_image
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.5.2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_AKS }}
+
+    - name: Set the target AKS cluster
+      uses: Azure/aks-set-context@v3
+      with:
+        cluster-name: microservices
+        resource-group: kubernetes
+
+    - name: Modify & apply template
+      run: kubectl create -f kubernetes/cron_script.yml
