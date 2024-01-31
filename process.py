@@ -9,7 +9,7 @@ from panoptes_client import Panoptes, User
 BATCH_SIZE = 50
 
 with open('/run/secrets/config.yml', 'r') as f:
-    CONFIG = yaml.load(f)
+    CONFIG = yaml.safe_load(f)
 
 session = boto3.Session(profile_name='default')
 s3 = session.resource('s3')
