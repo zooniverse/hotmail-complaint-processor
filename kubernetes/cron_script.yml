@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: hotmail-complaint-processor-cronjob
 spec:
-  schedule: "0 * * * *"
+  schedule: "0 2 * * *"
   jobTemplate:
     spec:
       template:
